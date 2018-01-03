@@ -18,6 +18,7 @@
      :errors errors
      :data-loaded? true}))
 
+;; I see no evil to don't use event-fx while we have no unit tests
 (re-frame/reg-event-db
   :select-file
   (fn [db [_ file]]

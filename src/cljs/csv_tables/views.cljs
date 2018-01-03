@@ -3,6 +3,18 @@
             [csv-tables.subs :as subs]
             ))
 
+(declare file-input aggregated-results validation-tab csv-table main-panel)
+
+(defn main-panel []
+  (let [table-data (re-frame/subscribe [::subs/table-data])
+        validation-result (re-frame/subscribe [::subs/validation-result])
+        errors (:errors @validation-result)]
+    [:div
+     [file-input]
+     (if (and (:valid? @validation-result) (:data-loaded? @validation-result)) [csv-table @table-data])
+     (if (not (empty? errors)) [validation-tab errors])]))
+
+
 (defn file-input []
   [:input {:type "file"
            :placeholder "Select file"
@@ -18,7 +30,7 @@
 
 (defn validation-tab [errors]
   [:ul (for [[index error] (map-indexed vector errors)]
-    ^{:key index} [:li {:style {"color" "red"}} error])])
+         ^{:key index} [:li {:style {"color" "red"}} error])])
 
 (defn csv-table [table-data]
   (let [columns (:columns table-data)
@@ -31,8 +43,12 @@
      [:table
       [:thead
        [:tr
-        [:th [:input {:type "text" :value name-column :on-change #(re-frame/dispatch [:column-title-change (-> % .-target .-value)])}]]
-        [:th [:input {:type "text" :value value-column :on-change #(re-frame/dispatch [:column-value-change (-> % .-target .-value)])}]]
+        [:th
+         [:input
+          {:type "text" :value name-column :on-change #(re-frame/dispatch [:column-title-change (-> % .-target .-value)])}]]
+        [:th
+         [:input
+          {:type "text" :value value-column :on-change #(re-frame/dispatch [:column-value-change (-> % .-target .-value)])}]]
         ]]
       [:tbody
        (for [[index row] (map-indexed vector rows)]
@@ -45,17 +61,7 @@
                                       :value (:value row)
                                       :on-change #(re-frame/dispatch [:row-value-change (-> % .-target .-value) index])}]]])
        ]]
-     [aggregated-results sum-value avg-value] ]
-
-    ))
+     [aggregated-results sum-value avg-value]]))
 
 
 
-(defn main-panel []
-  (let [table-data (re-frame/subscribe [::subs/table-data])
-        validation-result (re-frame/subscribe [::subs/validation-result])
-        errors (:errors @validation-result)]
-    [:div
-     [file-input]
-     (if (and (:valid? @validation-result) (:data-loaded? @validation-result)) [csv-table @table-data])
-     (if (not (empty? errors)) [validation-tab errors])]))
