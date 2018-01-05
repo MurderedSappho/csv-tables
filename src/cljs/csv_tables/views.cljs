@@ -19,7 +19,7 @@
   [:input {:type "file"
            :placeholder "Select file"
            :on-change #(re-frame/dispatch
-                         [:select-file (first (array-seq (-> % .-target .-files)))])}])
+                         [:select-file (last (array-seq (-> % .-target .-files)))])}])
 
 (defn aggregated-results [sum-value avg-value]
   [:div
